@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Project } from "../types";
 import { Loader2Icon } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
@@ -15,10 +15,11 @@ const Community = () => {
     try {
       const { data } = await api.get("/api/project/published");
       setProjects(data.projects);
-      setLoading(false);
     } catch (error: any) {
       console.log(error);
       toast.error(error?.response?.data?.message || error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -27,13 +28,10 @@ const Community = () => {
   }, []);
   return (
     <section className="section-shell relative px-4 pb-20 pt-10 md:px-10 lg:px-16 xl:px-24">
-      <div className="aurora-spot animate-aurora -left-16 top-20 h-72 w-72 bg-cyan-400/30" />
-      <div className="aurora-spot animate-aurora right-0 top-44 h-72 w-72 bg-blue-500/24 [animation-delay:1.3s]" />
-
-      <div className="mx-auto w-full max-w-[1400px]">
+      <div className="relative z-10 mx-auto w-full max-w-[1400px]">
         {loading ? (
           <div className="flex items-center justify-center h-[80vh]">
-            <Loader2Icon className="size-7 animate-spin text-indigo-200" />
+            <Loader2Icon className="size-7 animate-spin text-zinc-300" />
           </div>
         ) : projects.length > 0 ? (
           <div className="py-10 min-h-[80vh]">
@@ -94,7 +92,7 @@ const Community = () => {
                           {new Date(project.createdAt).toLocaleDateString()}
                         </span>
                         <div className="flex gap-2 text-white text-sm">
-                          <button className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/7 px-2.5 py-1.5 text-xs transition-all duration-300 hover:bg-white/14">
+                          <button className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-2.5 py-1.5 text-xs transition-all duration-300 hover:bg-white/20">
                             <span className="flex size-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-semibold text-black">
                               {project.user?.name?.slice(0, 1)}
                             </span>
@@ -115,7 +113,7 @@ const Community = () => {
             </h1>
             <button
               onClick={() => navigate("/")}
-              className="mt-5 rounded-xl border border-cyan-200/20 bg-linear-to-r from-sky-600 to-blue-600 px-5 py-2 text-white transition-all duration-300 hover:scale-[1.02] hover:from-sky-500 hover:to-blue-500"
+              className="mt-5 rounded-xl border border-white/20 bg-white px-5 py-2 text-black font-semibold transition-all duration-300 hover:scale-[1.02] hover:bg-zinc-200"
             >
               Create New
             </button>

@@ -98,13 +98,13 @@ const ProjectPreview = forwardRef<ProjectPreviewRef, ProjectPreviewProps>(
     };
 
     return (
-      <div className="glass-card relative flex h-full flex-1 overflow-hidden rounded-2xl max-sm:ml-2">
+      <div className="relative flex h-full flex-1 overflow-hidden rounded-xl border border-white/[0.06] bg-neutral-900/50 max-sm:ml-2">
         {project.current_code ? (
           <>
             <iframe
               ref={iframeRef}
               srcDoc={injectPreview(project.current_code)}
-              className={`h-full max-sm:w-full ${resolutions[device]} mx-auto border-x border-white/10 bg-white transition-all duration-300`}
+              className={`h-full max-sm:w-full ${resolutions[device]} mx-auto border-x border-white/[0.06] bg-white transition-all duration-300`}
             />
             {showEditorPanel && selectedElement && (
               <EditorPanel

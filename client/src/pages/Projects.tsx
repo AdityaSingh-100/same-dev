@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import type { Project } from "../types";
 import {
   ArrowBigDownDashIcon,
+  ArrowLeftIcon,
   EyeIcon,
   EyeOffIcon,
   FullscreenIcon,
@@ -21,6 +22,8 @@ import ProjectPreview, {
 import api from "@/configs/axios";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
+import { assets } from "../assets/assets";
+import { motion } from "framer-motion";
 
 const Projects = () => {
   const { projectId } = useParams();
@@ -118,110 +121,142 @@ const Projects = () => {
 
   if (loading) {
     return (
-      <>
-        <div className="flex items-center justify-center h-screen">
-          <Loader2Icon className="size-7 animate-spin text-violet-200" />
-        </div>
-      </>
+      <div className="flex items-center justify-center h-screen bg-neutral-950">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 blur-xl opacity-30 animate-pulse" />
+            <Loader2Icon className="relative size-8 animate-spin text-sky-300" />
+          </div>
+          <p className="text-sm text-slate-400 animate-pulse">Loading project...</p>
+        </motion.div>
+      </div>
     );
   }
+
   return project ? (
-    <div className="section-shell flex h-screen w-full flex-col px-2 pb-2 text-white sm:px-3">
-      <div className="glass-card mt-2 flex flex-col gap-4 rounded-2xl px-4 py-3 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-2 sm:min-w-[18rem] text-nowrap">
-          <img
-            src="/favicon.svg"
-            alt="logo"
-            className="h-6 cursor-pointer"
-            onClick={() => navigate("/")}
-          />
-          <div className="max-w-64 sm:max-w-xs">
-            <p className="truncate text-sm font-medium capitalize text-slate-100">
-              {project.name}
-            </p>
-            <p className="-mt-0.5 text-xs text-slate-400">
-              Previewing last saved version
-            </p>
+    <div className="flex h-screen w-full flex-col bg-neutral-950 text-white">
+      {/* ─── Top Toolbar ─── */}
+      <motion.header
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="relative z-20 border-b border-white/[0.06] bg-neutral-950/80 backdrop-blur-xl"
+      >
+        <div className="flex items-center justify-between px-3 py-2.5 sm:px-4">
+          {/* Left: Logo + Project info */}
+          <div className="flex items-center gap-3 min-w-0">
+            <button
+              onClick={() => navigate("/projects")}
+              className="group flex items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2.5 py-1.5 text-xs text-slate-400 transition-all duration-200 hover:border-white/10 hover:bg-white/[0.06] hover:text-slate-200"
+            >
+              <ArrowLeftIcon size={14} className="transition-transform group-hover:-translate-x-0.5" />
+              <span className="hidden sm:inline">Back</span>
+            </button>
+
+            <div className="hidden h-5 w-px bg-white/[0.08] sm:block" />
+
+            <img
+              src={assets.logo}
+              alt="logo"
+              className="hidden h-5 cursor-pointer sm:block"
+              onClick={() => navigate("/")}
+            />
+
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-slate-100 max-w-[180px] sm:max-w-xs">
+                {project.name}
+              </p>
+              <p className="text-[11px] text-slate-500">
+                {project.isPublished ? "Published" : "Draft"} · Last saved version
+              </p>
+            </div>
           </div>
-          <div className="sm:hidden flex-1 flex justify-end">
-            {isMenuOpen ? (
-              <MessageSquareIcon
-                onClick={() => setIsMenuOpen(false)}
-                className="size-6 cursor-pointer text-slate-300"
-              />
-            ) : (
-              <XIcon
-                onClick={() => setIsMenuOpen(true)}
-                className="size-6 cursor-pointer text-slate-300"
-              />
-            )}
+
+          {/* Center: Device switcher */}
+          <div className="hidden rounded-lg border border-white/[0.06] bg-white/[0.02] p-0.5 sm:flex sm:gap-0.5">
+            {[
+              { key: "phone" as const, icon: SmartphoneIcon, label: "Mobile" },
+              { key: "tablet" as const, icon: TabletIcon, label: "Tablet" },
+              { key: "desktop" as const, icon: LaptopIcon, label: "Desktop" },
+            ].map(({ key, icon: Icon, label }) => (
+              <button
+                key={key}
+                onClick={() => setDevice(key)}
+                title={label}
+                className={`rounded-md px-2.5 py-1.5 transition-all duration-200 ${
+                  device === key
+                    ? "bg-white/10 text-sky-300 shadow-sm shadow-sky-500/10"
+                    : "text-slate-500 hover:bg-white/[0.04] hover:text-slate-300"
+                }`}
+              >
+                <Icon className="size-4" />
+              </button>
+            ))}
+          </div>
+
+          {/* Right: Actions */}
+          <div className="flex items-center gap-1.5 text-xs sm:text-sm">
+            {/* Mobile menu toggle */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="rounded-lg border border-white/[0.06] bg-white/[0.03] p-2 text-slate-400 transition-all duration-200 hover:bg-white/[0.06] hover:text-white sm:hidden"
+            >
+              {isMenuOpen ? <XIcon size={16} /> : <MessageSquareIcon size={16} />}
+            </button>
+
+            <button
+              onClick={saveProject}
+              disabled={isSaving}
+              className="hidden items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 text-slate-300 transition-all duration-200 hover:border-white/10 hover:bg-white/[0.06] hover:text-white disabled:opacity-50 sm:flex"
+            >
+              {isSaving ? (
+                <Loader2Icon className="animate-spin" size={14} />
+              ) : (
+                <SaveIcon size={14} />
+              )}
+              Save
+            </button>
+
+            <Link
+              target="_blank"
+              to={`/preview/${projectId}`}
+              className="hidden items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 text-slate-300 transition-all duration-200 hover:border-white/10 hover:bg-white/[0.06] hover:text-white sm:inline-flex"
+            >
+              <FullscreenIcon size={14} /> Preview
+            </Link>
+
+            <button
+              onClick={downloadCode}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-sky-600 to-blue-600 px-3 py-1.5 font-medium text-white shadow-lg shadow-sky-500/10 transition-all duration-200 hover:from-sky-500 hover:to-blue-500 hover:shadow-sky-500/20"
+            >
+              <ArrowBigDownDashIcon size={14} />
+              <span className="hidden sm:inline">Download</span>
+            </button>
+
+            <button
+              onClick={togglePublish}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-3 py-1.5 font-medium text-white shadow-lg shadow-emerald-500/10 transition-all duration-200 hover:from-emerald-500 hover:to-teal-500 hover:shadow-emerald-500/20"
+            >
+              {project.isPublished ? (
+                <EyeOffIcon size={14} />
+              ) : (
+                <EyeIcon size={14} />
+              )}
+              <span className="hidden sm:inline">
+                {project.isPublished ? "Unpublish" : "Publish"}
+              </span>
+            </button>
           </div>
         </div>
+      </motion.header>
 
-        <div className="hidden rounded-xl border border-white/10 bg-black/30 p-1 sm:flex sm:gap-1.5">
-          <button
-            onClick={() => setDevice("phone")}
-            className={`rounded-lg p-1.5 transition-all duration-300 ${device === "phone" ? "bg-white/15 text-cyan-200" : "text-slate-400 hover:bg-white/10 hover:text-slate-200"}`}
-          >
-            <SmartphoneIcon className="size-4" />
-          </button>
-
-          <button
-            onClick={() => setDevice("tablet")}
-            className={`rounded-lg p-1.5 transition-all duration-300 ${device === "tablet" ? "bg-white/15 text-cyan-200" : "text-slate-400 hover:bg-white/10 hover:text-slate-200"}`}
-          >
-            <TabletIcon className="size-4" />
-          </button>
-
-          <button
-            onClick={() => setDevice("desktop")}
-            className={`rounded-lg p-1.5 transition-all duration-300 ${device === "desktop" ? "bg-white/15 text-cyan-200" : "text-slate-400 hover:bg-white/10 hover:text-slate-200"}`}
-          >
-            <LaptopIcon className="size-4" />
-          </button>
-        </div>
-
-        <div className="flex flex-1 flex-wrap items-center justify-end gap-2 text-xs sm:text-sm">
-          <button
-            onClick={saveProject}
-            disabled={isSaving}
-            className="hidden rounded-lg border border-white/15 bg-white/8 px-3 py-1.5 transition-all duration-300 hover:bg-white/14 max-sm:hidden sm:flex sm:items-center sm:gap-2"
-          >
-            {isSaving ? (
-              <Loader2Icon className="animate-spin" size={15} />
-            ) : (
-              <SaveIcon size={15} />
-            )}{" "}
-            Save
-          </button>
-          <Link
-            target="_blank"
-            to={`/preview/${projectId}`}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/8 px-3 py-1.5 transition-all duration-300 hover:bg-white/14"
-          >
-            <FullscreenIcon size={14} /> Preview
-          </Link>
-          <button
-            onClick={downloadCode}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-200/20 bg-linear-to-r from-sky-600 to-blue-600 px-3 py-1.5 text-white transition-all duration-300 hover:from-sky-500 hover:to-blue-500"
-          >
-            <ArrowBigDownDashIcon size={14} /> Download
-          </button>
-          <button
-            onClick={togglePublish}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-cyan-200/20 bg-linear-to-r from-cyan-600 to-sky-600 px-3 py-1.5 text-white transition-all duration-300 hover:from-cyan-500 hover:to-sky-500"
-          >
-            {project.isPublished ? (
-              <EyeOffIcon size={14} />
-            ) : (
-              <EyeIcon size={14} />
-            )}
-            {project.isPublished ? "Unpublish" : "Publish"}
-          </button>
-        </div>
-      </div>
-
-      <div className="flex flex-1 overflow-auto pt-2">
+      {/* ─── Main Content ─── */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
         <Sidebar
           isMenuOpen={isMenuOpen}
           project={project}
@@ -230,7 +265,8 @@ const Projects = () => {
           setIsGenerating={setIsGenerating}
         />
 
-        <div className="flex-1 p-2 pl-0">
+        {/* Preview */}
+        <div className="flex-1 p-2 sm:p-3">
           <ProjectPreview
             ref={previewRef}
             project={project}
@@ -241,10 +277,20 @@ const Projects = () => {
       </div>
     </div>
   ) : (
-    <div className="flex items-center justify-center h-screen">
-      <p className="text-2xl font-medium text-gray-200">
-        Unable to load project!
+    <div className="flex h-screen flex-col items-center justify-center gap-4 bg-neutral-950">
+      <div className="relative">
+        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-red-500 to-orange-500 blur-xl opacity-20" />
+        <XIcon className="relative size-10 text-red-400" />
+      </div>
+      <p className="text-xl font-medium text-slate-200">
+        Unable to load project
       </p>
+      <button
+        onClick={() => navigate("/projects")}
+        className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-300 transition-all duration-200 hover:bg-white/10"
+      >
+        Back to Projects
+      </button>
     </div>
   );
 };

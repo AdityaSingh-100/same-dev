@@ -10,6 +10,7 @@ import {
 import { Link } from "react-router-dom";
 import api from "@/configs/axios";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface SidebarProps {
   isMenuOpen: boolean;
@@ -92,19 +93,24 @@ const Sidebar = ({
 
   return (
     <div
-      className={`h-full rounded-2xl border border-white/10 bg-slate-950/65 backdrop-blur-xl transition-all sm:max-w-sm ${
+      className={`h-full border-r border-white/[0.06] bg-neutral-950/60 backdrop-blur-xl transition-all duration-300 sm:max-w-sm ${
         isMenuOpen
           ? "max-sm:w-0 max-sm:overflow-hidden max-sm:border-none"
           : "w-full"
       }`}
     >
       <div className="flex h-full flex-col">
-        <div className="flex-1 overflow-y-auto no-scrollbar px-3 pt-3">
-          <p className="premium-chip mb-4 inline-flex rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-slate-300">
-            Conversation
-          </p>
+        {/* Messages area */}
+        <div className="flex-1 overflow-y-auto no-scrollbar px-3 pt-4">
+          <div className="mb-4 flex items-center gap-2">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+            <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-slate-500">
+              Conversation
+            </span>
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+          </div>
 
-          <div className="flex flex-col gap-4 pb-4">
+          <div className="flex flex-col gap-3 pb-4">
             {[...project.conversation, ...project.versions]
               .sort(
                 (a, b) =>
@@ -118,51 +124,61 @@ const Sidebar = ({
                   const msg = message as Message;
                   const isUser = msg.role === "user";
                   return (
-                    <div
+                    <motion.div
                       key={msg.id}
-                      className={`flex items-start gap-2.5 ${isUser ? "justify-end" : "justify-start"}`}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className={`flex items-start gap-2 ${isUser ? "justify-end" : "justify-start"}`}
                     >
                       {!isUser && (
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-cyan-200/20 bg-linear-to-br from-sky-600 to-blue-600">
-                          <BotIcon className="size-4 text-white" />
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-sky-600 to-blue-600 shadow-lg shadow-sky-500/10">
+                          <BotIcon className="size-3.5 text-white" />
                         </div>
                       )}
                       <div
-                        className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm ${isUser ? "rounded-tr-sm bg-linear-to-r from-sky-600 to-blue-600 text-white" : "rounded-tl-sm border border-white/10 bg-white/8 text-slate-100"}`}
+                        className={`max-w-[82%] rounded-2xl px-3 py-2 text-[13px] leading-relaxed ${
+                          isUser
+                            ? "rounded-tr-md bg-gradient-to-r from-sky-600 to-blue-600 text-white shadow-lg shadow-sky-500/10"
+                            : "rounded-tl-md border border-white/[0.06] bg-white/[0.03] text-slate-200"
+                        }`}
                       >
                         {msg.content}
                       </div>
                       {isUser && (
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-slate-800">
-                          <UserIcon className="size-4 text-slate-200" />
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.03]">
+                          <UserIcon className="size-3.5 text-slate-400" />
                         </div>
                       )}
-                    </div>
+                    </motion.div>
                   );
                 }
 
                 const ver = message as Version;
                 return (
-                  <div
+                  <motion.div
                     key={ver.id}
-                    className="glass-card my-2 w-[90%] self-center rounded-xl p-3 text-slate-100"
+                    initial={{ opacity: 0, scale: 0.97 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.2 }}
+                    className="my-1 w-[92%] self-center rounded-xl border border-white/[0.06] bg-white/[0.02] p-3"
                   >
-                    <div className="text-xs font-medium">
-                      Code updated
-                      <br />
-                      <span className="text-[11px] font-normal text-slate-400">
-                        {new Date(ver.timestamp).toLocaleString()}
+                    <div className="flex items-center gap-2 text-xs">
+                      <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                      <span className="font-medium text-slate-200">Code updated</span>
+                      <span className="text-[10px] text-slate-500 ml-auto">
+                        {new Date(ver.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
                     <div className="mt-2 flex items-center justify-between gap-2">
                       {project.current_version_index === ver.id ? (
-                        <button className="rounded-md border border-white/10 bg-white/7 px-2.5 py-1 text-[11px] text-slate-300">
+                        <span className="rounded-md border border-white/[0.06] bg-white/[0.03] px-2 py-1 text-[10px] text-slate-400">
                           Current version
-                        </button>
+                        </span>
                       ) : (
                         <button
                           onClick={() => handleRollback(ver.id)}
-                          className="rounded-md border border-cyan-200/20 bg-linear-to-r from-sky-600 to-blue-600 px-2.5 py-1 text-[11px] text-white transition-all duration-300 hover:from-sky-500 hover:to-blue-500"
+                          className="rounded-md bg-gradient-to-r from-sky-600 to-blue-600 px-2.5 py-1 text-[10px] font-medium text-white transition-all duration-200 hover:from-sky-500 hover:to-blue-500"
                         >
                           Roll back
                         </button>
@@ -171,61 +187,70 @@ const Sidebar = ({
                         target="_blank"
                         to={`/preview/${project.id}/${ver.id}`}
                       >
-                        <EyeIcon className="size-6 rounded-md border border-white/10 bg-white/7 p-1 transition-all duration-300 hover:bg-white/14" />
+                        <EyeIcon className="size-6 rounded-md border border-white/[0.06] bg-white/[0.03] p-1 text-slate-400 transition-all duration-200 hover:bg-white/[0.06] hover:text-white" />
                       </Link>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
 
-            {isGenerating && (
-              <div className="flex items-start gap-2.5 justify-start">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-cyan-200/20 bg-linear-to-br from-sky-600 to-blue-600">
-                  <BotIcon className="size-4 text-white" />
-                </div>
-                <div className="flex h-full items-end gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-2">
-                  <span
-                    className="size-2 animate-bounce rounded-full bg-slate-400"
-                    style={{ animationDelay: "0s" }}
-                  />
-                  <span
-                    className="size-2 animate-bounce rounded-full bg-slate-400"
-                    style={{ animationDelay: "0.2s" }}
-                  />
-                  <span
-                    className="size-2 animate-bounce rounded-full bg-slate-400"
-                    style={{ animationDelay: "0.4s" }}
-                  />
-                </div>
-              </div>
-            )}
+            {/* Typing indicator */}
+            <AnimatePresence>
+              {isGenerating && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  className="flex items-start gap-2"
+                >
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-sky-600 to-blue-600 shadow-lg shadow-sky-500/10">
+                    <BotIcon className="size-3.5 text-white" />
+                  </div>
+                  <div className="flex items-end gap-1 rounded-2xl rounded-tl-md border border-white/[0.06] bg-white/[0.03] px-3 py-2.5">
+                    <span
+                      className="size-1.5 animate-bounce rounded-full bg-slate-400"
+                      style={{ animationDelay: "0s" }}
+                    />
+                    <span
+                      className="size-1.5 animate-bounce rounded-full bg-slate-400"
+                      style={{ animationDelay: "0.15s" }}
+                    />
+                    <span
+                      className="size-1.5 animate-bounce rounded-full bg-slate-400"
+                      style={{ animationDelay: "0.3s" }}
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <div ref={messageRef} />
           </div>
         </div>
 
-        <form onSubmit={handleRevisions} className="m-3 relative">
-          <div className="relative">
+        {/* Input area */}
+        <div className="border-t border-white/[0.06] p-3">
+          <form onSubmit={handleRevisions} className="relative">
             <textarea
               onChange={(e) => setInput(e.target.value)}
               value={input}
-              rows={4}
-              placeholder="Describe your website or request changes..."
-              className="premium-input w-full resize-none rounded-xl p-3 pr-11 text-sm text-slate-100 outline-none transition-all duration-300 placeholder:text-slate-500"
+              rows={3}
+              placeholder="Describe changes to your website..."
+              className="w-full resize-none rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 pr-11 text-sm text-slate-100 outline-none transition-all duration-200 placeholder:text-slate-600 focus:border-sky-500/30 focus:bg-white/[0.03]"
               disabled={isGenerating}
             />
             <button
               disabled={isGenerating || !input.trim()}
-              className="absolute bottom-2.5 right-2.5 rounded-full border border-cyan-200/20 bg-linear-to-r from-sky-600 to-blue-600 text-white transition-all duration-300 hover:from-sky-500 hover:to-blue-500 disabled:opacity-60"
+              className="absolute bottom-2.5 right-2.5 rounded-lg bg-gradient-to-r from-sky-600 to-blue-600 p-1.5 text-white shadow-lg shadow-sky-500/10 transition-all duration-200 hover:from-sky-500 hover:to-blue-500 disabled:opacity-40 disabled:shadow-none"
             >
               {isGenerating ? (
-                <Loader2Icon className="size-7 p-1.5 animate-spin text-white" />
+                <Loader2Icon className="size-5 animate-spin" />
               ) : (
-                <SendIcon className="size-7 p-1.5 text-white" />
+                <SendIcon className="size-5" />
               )}
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

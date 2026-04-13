@@ -73,15 +73,18 @@ export const createUserProject = async (req: Request, res: Response) => {
       data: { credits: { decrement: 5 } },
     });
 
+    // Send response immediately - background processing follows
     res.json({ projectId: project.id });
-
-    // Enhance user prompt
-    const promptEnhanceResponse = await openai.chat.completions.create({
-      model: "kwaipilot/kat-coder-pro:free",
-      messages: [
-        {
-          role: "system",
-          content: `
+    // model: "kwaipilot/kat-coder-pro:free",
+    // ─── Background AI Processing (response already sent) ───
+    try {
+      // Enhance user prompt
+      const promptEnhanceResponse = await openai.chat.completions.create({
+        model: "groq/compound-mini",
+        messages: [
+          {
+            role: "system",
+            content: `
                     You are a prompt enhancement specialist. Take the user's website request and expand it into a detailed, comprehensive prompt that will help create the best possible website.
 
                     Enhance this prompt by:
@@ -93,39 +96,40 @@ export const createUserProject = async (req: Request, res: Response) => {
                     6. Adding any missing but important elements
 
                     Return ONLY the enhanced prompt, nothing else. Make it detailed but concise (2-3 paragraphs max).`,
+          },
+          {
+            role: "user",
+            content: initial_prompt,
+          },
+        ],
+      });
+
+      const enhancedPrompt = promptEnhanceResponse.choices[0].message.content;
+
+      await prisma.conversation.create({
+        data: {
+          role: "assistant",
+          content: `I've enhanced your prompt to: "${enhancedPrompt}"`,
+          projectId: project.id,
         },
-        {
-          role: "user",
-          content: initial_prompt,
+      });
+
+      await prisma.conversation.create({
+        data: {
+          role: "assistant",
+          content: "now generating your website...",
+          projectId: project.id,
         },
-      ],
-    });
+      });
 
-    const enhancedPrompt = promptEnhanceResponse.choices[0].message.content;
-
-    await prisma.conversation.create({
-      data: {
-        role: "assistant",
-        content: `I've enhanced your prompt to: "${enhancedPrompt}"`,
-        projectId: project.id,
-      },
-    });
-
-    await prisma.conversation.create({
-      data: {
-        role: "assistant",
-        content: "now generating your website...",
-        projectId: project.id,
-      },
-    });
-
-    // Generate website code
-    const codeGenerationResponse = await openai.chat.completions.create({
-      model: "kwaipilot/kat-coder-pro:free",
-      messages: [
-        {
-          role: "system",
-          content: `
+      // Generate website code
+        // model: "kwaipilot/kat-coder-pro:free",
+      const codeGenerationResponse = await openai.chat.completions.create({
+        model: "groq/compound-mini",
+        messages: [
+          {
+            role: "system",
+            content: `
                      You are an expert web developer. Create a complete, production-ready, single-page website based on this request: "${enhancedPrompt}"
 
                     CRITICAL REQUIREMENTS:
@@ -150,69 +154,98 @@ export const createUserProject = async (req: Request, res: Response) => {
                     4. Do NOT include markdown, explanations, notes, or code fences.
 
                     The HTML should be complete and ready to render as-is with Tailwind CSS.`,
-        },
-        {
-          role: "user",
-          content: enhancedPrompt || "",
-        },
-      ],
-    });
+          },
+          {
+            role: "user",
+            content: enhancedPrompt || "",
+          },
+        ],
+      });
 
-    const code = codeGenerationResponse.choices[0].message.content || "";
+      const code = codeGenerationResponse.choices[0].message.content || "";
 
-    if (!code) {
-      await prisma.conversation.create({
+      if (!code) {
+        await prisma.conversation.create({
+          data: {
+            role: "assistant",
+            content: "Unable to generate the code, please try again",
+            projectId: project.id,
+          },
+        });
+        await prisma.user.update({
+          where: { id: userId },
+          data: { credits: { increment: 5 } },
+        });
+        return;
+      }
+
+      // Create Version for the project
+      const version = await prisma.version.create({
         data: {
-          role: "assistant",
-          content: "Unable to generate the code, please try again",
+          code: code
+            .replace(/```[a-z]*\n?/gi, "")
+            .replace(/```$/g, "")
+            .trim(),
+          description: "Initial version",
           projectId: project.id,
         },
       });
-      await prisma.user.update({
-        where: { id: userId },
-        data: { credits: { increment: 5 } },
+
+      await prisma.conversation.create({
+        data: {
+          role: "assistant",
+          content:
+            "I've created your website! You can now preview it and request any changes.",
+          projectId: project.id,
+        },
       });
-      return;
+
+      await prisma.websiteProject.update({
+        where: { id: project.id },
+        data: {
+          current_code: code
+            .replace(/```[a-z]*\n?/gi, "")
+            .replace(/```$/g, "")
+            .trim(),
+          current_version_index: version.id,
+        },
+      });
+    } catch (bgError: any) {
+      // Background AI processing failed - response was already sent
+      console.error("Background processing error:", bgError.message);
+      try {
+        await prisma.conversation.create({
+          data: {
+            role: "assistant",
+            content:
+              "Generation failed: " +
+              (bgError.message || "Unknown error. Please try again."),
+            projectId: project.id,
+          },
+        });
+        await prisma.user.update({
+          where: { id: userId },
+          data: { credits: { increment: 5 } },
+        });
+      } catch (dbErr) {
+        console.error("Failed to record background error:", dbErr);
+      }
     }
-
-    // Create Version for the project
-    const version = await prisma.version.create({
-      data: {
-        code: code
-          .replace(/```[a-z]*\n?/gi, "")
-          .replace(/```$/g, "")
-          .trim(),
-        description: "Initial version",
-        projectId: project.id,
-      },
-    });
-
-    await prisma.conversation.create({
-      data: {
-        role: "assistant",
-        content:
-          "I've created your website! You can now preview it and request any changes.",
-        projectId: project.id,
-      },
-    });
-
-    await prisma.websiteProject.update({
-      where: { id: project.id },
-      data: {
-        current_code: code
-          .replace(/```[a-z]*\n?/gi, "")
-          .replace(/```$/g, "")
-          .trim(),
-        current_version_index: version.id,
-      },
-    });
   } catch (error: any) {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { credits: { increment: 5 } },
-    });
     console.log(error);
-    res.status(500).json({ message: error.message });
+    // Only send error response if headers haven't been sent yet
+    if (!res.headersSent) {
+      res.status(500).json({ message: error.message });
+    }
+    // Refund credits if possible
+    if (userId) {
+      try {
+        await prisma.user.update({
+          where: { id: userId },
+          data: { credits: { increment: 5 } },
+        });
+      } catch (_) {}
+    }
   }
 };
 

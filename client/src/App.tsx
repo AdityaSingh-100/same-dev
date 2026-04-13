@@ -29,7 +29,7 @@ const App = () => {
       <Toaster theme="dark" position="top-right" richColors />
       {!hideNavbar && <Navbar />}
 
-      <main className={hideNavbar ? "h-screen" : "min-h-[76vh]"}>
+      <main className={hideNavbar ? "h-screen" : "min-h-[76vh] pt-20"}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/pricing" element={<Pricing />} />

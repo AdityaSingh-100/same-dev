@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Project } from "../types";
 import { Loader2Icon, PlusIcon, TrashIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -17,10 +17,11 @@ const MyProjects = () => {
     try {
       const { data } = await api.get("/api/user/projects");
       setProjects(data.projects);
-      setLoading(false);
     } catch (error: any) {
       console.log(error);
       toast.error(error?.response?.data?.message || error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -40,22 +41,20 @@ const MyProjects = () => {
   };
 
   useEffect(() => {
-    if (session?.user && !isPending) {
+    if (isPending) return;
+    if (session?.user) {
       fetchProjects();
-    } else if (!isPending && !session?.user) {
+    } else {
       navigate("/");
       toast("Please login to view your projects");
     }
-  }, [session?.user]);
+  }, [session?.user, isPending, navigate]);
   return (
     <section className="section-shell relative px-4 pb-20 pt-10 md:px-10 lg:px-16 xl:px-24">
-      <div className="aurora-spot animate-aurora -left-10 top-24 h-72 w-72 bg-cyan-400/30" />
-      <div className="aurora-spot animate-aurora right-0 top-52 h-72 w-72 bg-blue-500/28 [animation-delay:1.5s]" />
-
-      <div className="mx-auto w-full max-w-[1400px]">
+      <div className="relative z-10 mx-auto w-full max-w-[1400px]">
         {loading ? (
           <div className="flex items-center justify-center h-[80vh]">
-            <Loader2Icon className="size-7 animate-spin text-indigo-200" />
+            <Loader2Icon className="size-7 animate-spin text-zinc-300" />
           </div>
         ) : projects.length > 0 ? (
           <div className="py-10 min-h-[80vh]">
@@ -70,7 +69,7 @@ const MyProjects = () => {
               </div>
               <button
                 onClick={() => navigate("/")}
-                className="inline-flex items-center gap-2 rounded-xl border border-cyan-200/20 bg-linear-to-r from-sky-600 to-blue-600 px-3 py-2 text-sm text-white transition-all duration-300 hover:scale-[1.02] hover:from-sky-500 hover:to-blue-500 sm:px-6"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white px-3 py-2 text-sm font-semibold text-black transition-all duration-300 hover:scale-[1.02] hover:bg-zinc-200 sm:px-6"
               >
                 <PlusIcon size={18} /> Create New
               </button>
@@ -126,14 +125,14 @@ const MyProjects = () => {
                         <div className="flex gap-2 text-white text-sm">
                           <button
                             onClick={() => navigate(`/preview/${project.id}`)}
-                            className="rounded-lg border border-white/10 bg-white/7 px-3 py-1.5 text-xs transition-all duration-300 hover:bg-white/14"
+                            className="rounded-lg border border-white/10 bg-white/10 px-3 py-1.5 text-xs transition-all duration-300 hover:bg-white/20"
                           >
                             Preview
                           </button>
 
                           <button
                             onClick={() => navigate(`/projects/${project.id}`)}
-                            className="rounded-lg border border-white/10 bg-white/7 px-3 py-1.5 text-xs transition-all duration-300 hover:bg-white/14"
+                            className="rounded-lg border border-white/10 bg-white/10 px-3 py-1.5 text-xs transition-all duration-300 hover:bg-white/20"
                           >
                             Open
                           </button>
@@ -158,7 +157,7 @@ const MyProjects = () => {
             </h1>
             <button
               onClick={() => navigate("/")}
-              className="mt-5 rounded-xl border border-cyan-200/20 bg-linear-to-r from-sky-600 to-blue-600 px-5 py-2 text-white transition-all duration-300 hover:scale-[1.02] hover:from-sky-500 hover:to-blue-500"
+              className="mt-5 rounded-xl border border-white/20 bg-white px-5 py-2 text-black font-semibold transition-all duration-300 hover:scale-[1.02] hover:bg-zinc-200"
             >
               Create New
             </button>
