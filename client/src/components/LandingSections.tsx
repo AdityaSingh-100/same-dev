@@ -47,7 +47,8 @@ export const PoweredBySection = () => (
     className="mt-6 flex flex-col items-center gap-4"
   >
     <p className="text-sm text-slate-400">
-      Better the prompt → Better the <strong className="text-slate-200">result</strong>
+      Better the prompt → Better the{" "}
+      <strong className="text-slate-200">result</strong>
     </p>
     <div className="glass-card rounded-2xl px-6 py-3 flex items-center gap-4">
       <span className="text-xs text-slate-400 font-medium">Powered by</span>
@@ -110,8 +111,7 @@ export const HowItWorksSection = () => (
       <p className="max-w-xl text-slate-400 text-sm md:text-base leading-relaxed">
         Say goodbye to tutorials. Forget coding headaches. Type your app idea,
         and in a blink, you get a full-stack app ready to run, connect, and
-        launch — without sacrificing your sanity. Think of it as your app
-        genie.
+        launch — without sacrificing your sanity. Think of it as your app genie.
       </p>
 
       {/* Paper airplane decorative SVG */}
@@ -140,58 +140,104 @@ export const ComparisonSection = () => (
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true, margin: "-80px" }}
     transition={{ duration: 0.6 }}
-    className="mt-28 w-full flex flex-col items-center"
+    className="relative mt-32 w-full flex flex-col items-center overflow-hidden"
   >
-    {/* Badge */}
-    <span className="premium-chip inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs text-slate-300 mb-6">
-      <span className="w-2 h-2 rounded-full bg-blue-400 inline-block" />
+    <div
+      className="pointer-events-none absolute inset-0 opacity-30"
+      style={{
+        backgroundImage:
+          "radial-gradient(rgba(56, 189, 248, 0.18) 1px, transparent 1px)",
+        backgroundSize: "22px 22px",
+      }}
+    />
+    <div className="pointer-events-none absolute -left-14 top-16 h-72 w-72 rounded-full bg-sky-500/8 blur-[110px]" />
+    <div className="pointer-events-none absolute -right-14 top-20 h-72 w-72 rounded-full bg-blue-500/10 blur-[110px]" />
+
+    <span className="premium-chip relative z-10 mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs text-slate-300">
+      <span className="inline-block h-2 w-2 rounded-full bg-sky-400" />
       See the Difference
     </span>
 
-    <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-3">
-      AI that doesn't look AI
+    <h2 className="relative z-10 text-center text-3xl font-bold text-white md:text-5xl">
+      AI that <span className="text-gradient">feels hand-crafted</span>
     </h2>
-    <p className="text-slate-400 text-center max-w-lg text-sm md:text-base mb-12">
-      For people, who are tired of those same blue-violet AI generated websites
-      that can be smelled by miles away…
+    <p className="relative z-10 mb-12 mt-3 max-w-2xl text-center text-sm leading-relaxed text-slate-400 md:text-base">
+      If you are tired of the same generic AI template vibe, here is the visual
+      difference between copy-paste output and intentional design.
     </p>
 
-    {/* Side-by-side comparison cards */}
-    <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
-      {/* Other Tools */}
-      <div className="glass-card rounded-2xl p-1 relative overflow-hidden group">
-        <div className="absolute top-3 left-3 z-10">
-          <span className="bg-white/10 backdrop-blur-sm text-[11px] text-slate-300 px-2.5 py-1 rounded-md border border-white/10">
+    <div className="relative z-10 grid w-full max-w-5xl grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="glass-card hover-lift group relative overflow-hidden rounded-[26px] p-1">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-fuchsia-600/20 via-violet-500/5 to-transparent opacity-75 transition-opacity duration-500 group-hover:opacity-100" />
+        <div className="absolute left-4 top-4 z-20">
+          <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-medium tracking-wide text-slate-300 backdrop-blur-sm">
             Other Tools
           </span>
         </div>
-        <div className="rounded-xl overflow-hidden h-56 bg-gradient-to-br from-indigo-950/50 to-purple-950/50 flex items-center justify-center relative">
-          {/* Simulated generic AI site look */}
-          <div className="absolute inset-0 bg-gradient-to-b from-violet-600/10 to-blue-600/10" />
-          <div className="text-center z-10 px-6">
-            <div className="h-2 w-24 mx-auto bg-violet-400/20 rounded mb-3" />
-            <div className="h-3 w-44 mx-auto bg-violet-400/15 rounded mb-2" />
-            <div className="h-3 w-36 mx-auto bg-violet-400/15 rounded mb-4" />
-            <div className="h-8 w-28 mx-auto bg-gradient-to-r from-violet-600/30 to-blue-600/30 rounded-lg" />
+
+        <div className="relative h-[17rem] overflow-hidden rounded-[22px] border border-white/5 bg-gradient-to-br from-[#231638] via-[#1b1730] to-[#141524] px-6 pt-16">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.08),transparent_45%),radial-gradient(circle_at_85%_80%,rgba(255,255,255,0.05),transparent_52%)]" />
+          <div className="relative mx-auto max-w-[17rem] text-center">
+            <div className="mx-auto mb-4 h-2.5 w-28 rounded-full bg-violet-200/25" />
+            <div className="mx-auto mb-2 h-3 w-52 rounded-full bg-violet-200/18" />
+            <div className="mx-auto mb-2 h-3 w-44 rounded-full bg-violet-200/16" />
+            <div className="mx-auto h-3 w-48 rounded-full bg-violet-200/14" />
+
+            <div className="mt-6 grid grid-cols-2 gap-2">
+              <div className="h-9 rounded-lg border border-violet-200/15 bg-violet-500/25" />
+              <div className="h-9 rounded-lg border border-violet-200/15 bg-violet-500/18" />
+            </div>
+
+            <p className="mt-5 text-[11px] tracking-wide text-violet-200/60">
+              Looks like every other AI landing page
+            </p>
           </div>
         </div>
       </div>
 
-      {/* same.dev */}
-      <div className="glass-card rounded-2xl p-1 relative overflow-hidden group ring-1 ring-blue-500/20">
-        <div className="absolute top-3 right-3 z-10">
-          <span className="bg-blue-500/20 backdrop-blur-sm text-[11px] text-blue-300 px-2.5 py-1 rounded-md border border-blue-500/20 font-semibold">
-            same
+      <div className="glass-card hover-lift group relative overflow-hidden rounded-[26px] p-1 ring-1 ring-sky-300/35 shadow-[0_20px_50px_rgba(2,6,23,0.68)]">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-sky-500/16 via-blue-500/8 to-cyan-500/8 opacity-90 transition-opacity duration-500 group-hover:opacity-100" />
+        <div className="pointer-events-none absolute inset-1.5 rounded-[20px] border border-sky-200/12" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.08] bg-[linear-gradient(to_right,rgba(148,163,184,0.3)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.3)_1px,transparent_1px)] bg-size-[24px_24px]"
+        />
+
+        <div className="absolute right-4 top-4 z-20">
+          <span className="rounded-full border border-sky-400/30 bg-sky-500/20 px-3 py-1 text-[11px] font-semibold tracking-wide text-sky-200 backdrop-blur-sm">
+            same.dev
           </span>
         </div>
-        <div className="rounded-xl overflow-hidden h-56 bg-gradient-to-br from-slate-900/80 to-slate-950/80 flex items-center justify-center relative">
-          <div className="text-center z-10 px-6">
-            <div className="h-2 w-20 mx-auto bg-white/10 rounded mb-3" />
-            <div className="h-3 w-48 mx-auto bg-white/8 rounded mb-2" />
-            <div className="h-3 w-40 mx-auto bg-white/8 rounded mb-4" />
-            <div className="flex gap-2 justify-center">
-              <div className="h-8 w-20 bg-white/10 rounded-lg" />
-              <div className="h-8 w-20 bg-gradient-to-r from-sky-600/40 to-blue-600/40 rounded-lg" />
+
+        <div className="relative h-[17rem] overflow-hidden rounded-[22px] border border-sky-500/20 bg-gradient-to-br from-[#071326] via-[#050d1c] to-[#02050f] px-5 pt-11">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(56,189,248,0.16),transparent_48%),radial-gradient(circle_at_80%_78%,rgba(59,130,246,0.14),transparent_50%)]" />
+
+          <div className="relative z-10">
+            <div className="mx-auto mb-4 h-2.5 w-24 rounded-full bg-white/15" />
+            <div className="mx-auto mb-5 h-3 w-56 rounded-full bg-white/10" />
+
+            <div className="grid grid-cols-[1.15fr_0.85fr] gap-3">
+              <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+                <div className="mb-2 h-2.5 w-24 rounded-full bg-white/20" />
+                <div className="mb-2 h-2.5 w-36 rounded-full bg-white/15" />
+                <div className="h-2.5 w-28 rounded-full bg-white/10" />
+                <div className="mt-4 flex items-center gap-2">
+                  <div className="h-7 w-16 rounded-lg bg-white/8" />
+                  <div className="h-7 w-20 rounded-lg bg-gradient-to-r from-sky-500/40 to-blue-500/35" />
+                </div>
+              </div>
+              <div className="rounded-xl border border-sky-400/20 bg-sky-500/8 p-3">
+                <div className="mb-2 h-2.5 w-14 rounded-full bg-sky-300/30" />
+                <div className="mb-2 h-2.5 w-20 rounded-full bg-sky-300/25" />
+                <div className="h-2.5 w-16 rounded-full bg-sky-300/20" />
+                <div className="mt-4 h-16 rounded-lg border border-sky-400/20 bg-gradient-to-br from-sky-500/20 to-blue-500/10" />
+              </div>
+            </div>
+
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-sky-300/70" />
+              <div className="h-2 w-10 rounded-full bg-sky-300/45" />
+              <div className="h-2 w-2 rounded-full bg-sky-300/35" />
             </div>
           </div>
         </div>
@@ -231,13 +277,15 @@ export const FeaturesSection = () => (
                 className="flex-1 rounded-sm bg-gradient-to-t from-sky-600 to-sky-400 opacity-80"
                 style={{ height: `${h}%` }}
               />
-            )
+            ),
           )}
         </div>
         <div>
           <p className="text-slate-300">
             <span className="text-2xl font-bold text-sky-400">10</span>{" "}
-            <span className="text-xs text-slate-400">Days of Rapid Progress</span>
+            <span className="text-xs text-slate-400">
+              Days of Rapid Progress
+            </span>
           </p>
         </div>
         <h3 className="text-base font-semibold text-white">
@@ -528,7 +576,9 @@ export const ContactSectionHome = () => (
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-sm text-slate-300 font-medium">Email</label>
+              <label className="text-sm text-slate-300 font-medium">
+                Email
+              </label>
               <input
                 type="email"
                 placeholder="you@example.com"
@@ -538,7 +588,9 @@ export const ContactSectionHome = () => (
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm text-slate-300 font-medium">Message</label>
+            <label className="text-sm text-slate-300 font-medium">
+              Message
+            </label>
             <textarea
               rows={4}
               placeholder="Tell us what you're thinking..."

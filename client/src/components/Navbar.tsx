@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { assets } from "../assets/assets";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { authClient } from "@/lib/auth-client";
@@ -6,10 +6,7 @@ import { UserButton } from "@daveyplate/better-auth-ui";
 import api from "@/configs/axios";
 import { toast } from "sonner";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  ChevronDownIcon,
-  GithubIcon,
-} from "lucide-react";
+import { ChevronDownIcon, GithubIcon } from "lucide-react";
 import {
   Navbar as ResizableNavbar,
   NavBody,
@@ -92,21 +89,24 @@ const Navbar = () => {
     <div className="relative w-full">
       <ResizableNavbar className="fixed inset-x-0 top-0 z-50">
         {/* ─── Desktop Navigation ─── */}
-        <NavBody className="!bg-black/60 backdrop-blur-xl border border-white/5 !max-w-[1400px]">
+        <NavBody className="!bg-black/60 backdrop-blur-xl border border-white/5 !max-w-[1400px] !px-5">
           {/* Logo */}
-          <Link to="/" className="relative z-20 flex items-center gap-2 mr-4 shrink-0">
+          <Link
+            to="/"
+            className="relative z-20 flex items-center gap-2 mr-4 shrink-0"
+          >
             <img src={assets.logo} alt="same.dev logo" className="h-5 sm:h-7" />
           </Link>
 
           {/* Center nav items */}
           <NavItems
             items={navItems}
-            className="!text-slate-400"
-            onItemClick={() => {}}
+            className="!absolute left-1/2 top-1/2 !z-10 !w-auto -translate-x-1/2 -translate-y-1/2 !text-slate-300"
+            onItemClick={(link) => handleNavItemClick(link)}
           />
 
           {/* Right side controls */}
-          <div className="relative z-20 flex items-center gap-1 shrink-0">
+          <div className="relative z-20 ml-auto flex items-center gap-1 shrink-0">
             {/* Resources dropdown */}
             <div className="relative" ref={resourcesRef}>
               <button
@@ -149,7 +149,7 @@ const Navbar = () => {
                         >
                           {item.label}
                         </a>
-                      )
+                      ),
                     )}
                   </motion.div>
                 )}
