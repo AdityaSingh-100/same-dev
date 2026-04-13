@@ -1,93 +1,155 @@
-import React, { useEffect, useState } from 'react'
-import { assets } from '../assets/assets';
-import { Link, useNavigate } from 'react-router-dom';
-import { authClient } from '@/lib/auth-client';
-import {UserButton} from '@daveyplate/better-auth-ui'
-import api from '@/configs/axios';
-import { toast } from 'sonner';
+import React, { useEffect, useState } from "react";
+import { assets } from "../assets/assets";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { authClient } from "@/lib/auth-client";
+import { UserButton } from "@daveyplate/better-auth-ui";
+import api from "@/configs/axios";
+import { toast } from "sonner";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRightIcon, MenuIcon, XIcon } from "lucide-react";
+
+const navItems = [
+  { label: "Home", to: "/" },
+  { label: "My Projects", to: "/projects" },
+  { label: "Community", to: "/community" },
+  { label: "Pricing", to: "/pricing" },
+];
 
 const Navbar = () => {
-    const [menuOpen, setMenuOpen] = React.useState(false);
-    const navigate = useNavigate()
-    const [credits, setCredits] = useState(0)
+  const [menuOpen, setMenuOpen] = React.useState(false);
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [credits, setCredits] = useState(0);
 
-    const {data: session} = authClient.useSession()
+  const { data: session } = authClient.useSession();
 
-    const getCredits = async () => {
-      try {
-        const {data} = await api.get('/api/user/credits');
-        setCredits(data.credits)
-      } catch (error: any) {
-        toast.error(error?.response?.data?.message || error.message)
-        console.log(error);
-      }
+  const getCredits = async () => {
+    try {
+      const { data } = await api.get("/api/user/credits");
+      setCredits(data.credits);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error.message);
+      console.log(error);
     }
+  };
 
-    useEffect(()=>{
-      if(session?.user){
-        getCredits()
-      }
-    },[session?.user])
+  useEffect(() => {
+    if (session?.user) {
+      getCredits();
+    }
+  }, [session?.user]);
 
   return (
     <>
-      <nav className="z-50 flex items-center justify-between w-full py-4 px-4 md:px-16 lg:px-24 xl:px-32 backdrop-blur border-b text-white border-slate-800">
-        <Link to='/'>
-              <img src={assets.logo} alt="logo" className='h-5 sm:h-7'/>
+      <motion.nav
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: "easeOut" }}
+        className="sticky top-0 z-50 border-b border-white/10 bg-black/35 backdrop-blur-xl"
+      >
+        <div className="mx-auto flex w-full max-w-[1400px] items-center justify-between px-4 py-4 md:px-10 xl:px-14">
+          <Link to="/" className="flex items-center gap-2">
+            <img src={assets.logo} alt="same.dev logo" className="h-5 sm:h-7" />
           </Link>
 
-          <div className="hidden md:flex items-center gap-8 transition duration-500">
-            <Link to='/'>Home</Link>
-            <Link to='/projects'>My Projects</Link>
-            <Link to='/community'>Community</Link>
-            <Link to='/pricing'>Pricing</Link>
-            
+          <div className="hidden items-center gap-1 rounded-full border border-white/15 bg-white/5 p-1.5 md:flex">
+            {navItems.map((item) => {
+              const isActive = pathname === item.to;
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-300 ${
+                    isActive
+                      ? "bg-white/14 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
+                      : "text-slate-300 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
 
-          <div className="flex items-center gap-3">
-          {!session?.user ? (
-            <button onClick={()=> navigate('/auth/signin')} className="px-6 py-1.5 max-sm:text-sm bg-indigo-600 active:scale-95 hover:bg-indigo-700 transition rounded">
-              Get started
-            </button>
-          ) : (
-            <>
-            <button className='bg-white/10 px-5 py-1.5 text-xs sm:text-sm border text-gray-200 rounded-full'>
-            Credits : <span className='text-indigo-300'>{credits}</span>
-            </button>
-            <UserButton size='icon'/>
-            </>
-            
-          ) 
-            }
+          <div className="flex items-center gap-2 sm:gap-3">
+            {!session?.user ? (
+              <button
+                onClick={() => navigate("/auth/signin")}
+                className="group inline-flex items-center gap-2 rounded-full border border-cyan-200/20 bg-linear-to-r from-sky-600 to-blue-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.03] hover:from-sky-500 hover:to-blue-500"
+              >
+                Get Started
+                <ArrowRightIcon
+                  size={14}
+                  className="transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </button>
+            ) : (
+              <>
+                <button className="hidden rounded-full border border-white/15 bg-white/7 px-4 py-1.5 text-xs text-slate-200 sm:block">
+                  Credits <span className="ml-1 text-cyan-300">{credits}</span>
+                </button>
+                <UserButton size="icon" />
+              </>
+            )}
 
-            <button id="open-menu" className="md:hidden active:scale-90 transition" onClick={() => setMenuOpen(true)} >
-            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5h16"/><path d="M4 12h16"/><path d="M4 19h16"/></svg>
-          </button>
+            <button
+              className="inline-flex rounded-full border border-white/15 bg-white/5 p-2.5 text-slate-100 transition-all duration-300 hover:bg-white/12 md:hidden"
+              onClick={() => setMenuOpen((prev) => !prev)}
+              aria-label="Toggle menu"
+            >
+              {menuOpen ? <XIcon size={18} /> : <MenuIcon size={18} />}
+            </button>
           </div>
+        </div>
+      </motion.nav>
 
-          
-        </nav>
-        {/* Mobile Menu */}
+      <AnimatePresence>
         {menuOpen && (
-          <div className="fixed inset-0 z-[100] bg-black/60 text-white backdrop-blur flex flex-col items-center justify-center text-lg gap-8 md:hidden transition-transform duration-300">
-            <Link to='/' onClick={() => setMenuOpen(false)}>Home</Link>
-            <Link to='/projects' onClick={() => setMenuOpen(false)}>My Projects</Link>
-            <Link to='/community' onClick={() => setMenuOpen(false)}>Community</Link>
-            <Link to='/pricing' onClick={() => setMenuOpen(false)}>Pricing</Link>
-            
-            
-            <button className="active:ring-3 active:ring-white aspect-square size-10 p-1 items-center justify-center bg-slate-100 hover:bg-slate-200 transition text-black rounded-md flex" onClick={() => setMenuOpen(false)} >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-            </button>
-          </div>
-        )}
-        {/* BACKGROUND IMAGE */}
-          <svg className="absolute inset-0 -z-10 size-full blur-[300px]" width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g filter="url(#a)"> <path d="M1279.12 651.482c-22 6.106-44 12.212-135.83 19.142-91.82 6.929-252.813 14.497-345.534 14.119s-112.296-8.932-132.029-20.074c-40.902-23.095-67.695-48.431-92.222-82.426-43.46-60.236-63.449-115.445-66.098-143.181-2.37-24.804 6.608-45.711 18.307-63.328 12.043-18.137 33.695-29.82 71.913-43.681 73.132-26.523 132.819-39.093 158.087-37.728 35.983 1.944 85.151 19.972 133.921 42.519 54.55 25.219 85.81 54.21 147.755 103.202 40.89 42.153 74.78 87.455 96.15 121.421 9.68 13.541 17 19.579 26.15 28.613" stroke="#8C00FF" strokeWidth="130" strokeLinecap="round"/> </g>
-              <g filter="url(#b)"> <path d="M984.952 466.869c-15.802 15.902-31.604 31.803-106.587 82.344-74.982 50.541-208.666 135.24-287.962 179.98-79.297 44.74-100.155 46.955-122.408 47.039-46.123.173-81.297-8.423-118.747-25.508-66.356-30.274-110.243-67.666-125.983-90.043-14.077-20.012-16.578-42.214-15.158-62.931 1.461-21.329 14.257-41.82 40.13-72.221 49.508-58.173 94.326-97.906 116.549-109.022 31.647-15.829 82.36-24.343 134.93-28.808 58.801-4.994 99.563 4.55 176.224 16.248 55.375 16.094 106.309 38.276 141.054 56.869 14.842 6.848 24.021 8.443 36.22 11.703" stroke="#3E0090" strokeWidth="130" strokeLinecap="round"/> </g>
-          </svg>
-    </>
-  )
-}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-100 bg-slate-950/75 backdrop-blur-sm md:hidden"
+            onClick={() => setMenuOpen(false)}
+          >
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ duration: 0.32, ease: "easeOut" }}
+              className="ml-auto flex h-full w-72 flex-col gap-2 border-l border-white/10 bg-slate-950/95 p-6 text-slate-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <p className="text-sm tracking-[0.25em] text-slate-400">
+                  NAVIGATION
+                </p>
+                <button
+                  className="rounded-full border border-white/15 p-2 transition-colors hover:bg-white/10"
+                  onClick={() => setMenuOpen(false)}
+                  aria-label="Close menu"
+                >
+                  <XIcon size={16} />
+                </button>
+              </div>
 
-export default Navbar
+              {navItems.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  onClick={() => setMenuOpen(false)}
+                  className="rounded-xl border border-transparent bg-white/5 px-4 py-3 text-sm font-medium transition-all duration-300 hover:border-white/20 hover:bg-white/10"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+};
+
+export default Navbar;
