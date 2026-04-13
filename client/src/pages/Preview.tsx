@@ -7,50 +7,64 @@ import api from "@/configs/axios";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 
-
 const Preview = () => {
-
-  const {data: session, isPending} = authClient.useSession()
-  const { projectId, versionId } = useParams()
-  const [code, setCode] = useState('');
+  const { data: session, isPending } = authClient.useSession();
+  const { projectId, versionId } = useParams();
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(true);
 
   const fetchCode = async () => {
-   try {
-    const { data } = await api.get(`/api/project/preview/${projectId}`)
-    setCode(data.project.current_code)
-    if(versionId){
-      data.project.versions.forEach((version: Version)=>{
-        if(version.id === versionId){
-          setCode(version.code)
-        }
-      })
+    try {
+      const { data } = await api.get(`/api/project/preview/${projectId}`);
+      setCode(data.project.current_code);
+      if (versionId) {
+        data.project.versions.forEach((version: Version) => {
+          if (version.id === versionId) {
+            setCode(version.code);
+          }
+        });
+      }
+      setLoading(false);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error.message);
+      console.log(error);
     }
-    setLoading(false)
-   } catch (error: any) {
-    toast.error(error?.response?.data?.message || error.message);
-    console.log(error);
-   }
-  }
+  };
 
-  useEffect(()=>{
-    if(!isPending && session?.user){
-      fetchCode()
+  useEffect(() => {
+    if (!isPending && session?.user) {
+      fetchCode();
     }
-  },[session?.user])
+  }, [session?.user]);
 
-  if(loading){
+  if (loading) {
     return (
-      <div className='flex items-center justify-center h-screen'>
-        <Loader2Icon className='size-7 animate-spin text-indigo-200' />
+      <div className="section-shell flex h-screen items-center justify-center">
+        <Loader2Icon className="size-7 animate-spin text-indigo-200" />
       </div>
-    )
+    );
   }
   return (
-    <div className="h-screen">
-      {code && <ProjectPreview project={{current_code: code} as Project} isGenerating={false} showEditorPanel={false}/>}
+    <div className="section-shell h-screen p-2 sm:p-3">
+      <div className="glass-card flex h-full flex-col overflow-hidden rounded-2xl">
+        <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-xs text-slate-400">
+          <span>Project Preview</span>
+          <span>
+            {versionId ? `Version ${versionId.slice(0, 8)}` : "Latest version"}
+          </span>
+        </div>
+        <div className="flex-1 p-2">
+          {code && (
+            <ProjectPreview
+              project={{ current_code: code } as Project}
+              isGenerating={false}
+              showEditorPanel={false}
+            />
+          )}
+        </div>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Preview
+export default Preview;
