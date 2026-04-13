@@ -1,4 +1,4 @@
-import OpenAI from 'openai';
+import OpenAI from "openai";
 
 const openai = new OpenAI({
   // baseURL: "https://openrouter.ai/api/v1",
@@ -6,4 +6,4 @@ const openai = new OpenAI({
   apiKey: process.env.AI_API_KEY,
 });
 
-export default openai
+export default openai;
