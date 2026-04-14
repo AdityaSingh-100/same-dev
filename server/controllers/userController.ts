@@ -80,7 +80,7 @@ export const createUserProject = async (req: Request, res: Response) => {
     try {
       // Enhance user prompt
       const promptEnhanceResponse = await openai.chat.completions.create({
-        model: "groq/compound-mini",
+        model: "arcee-ai/trinity-large-preview:free",
         messages: [
           {
             role: "system",
@@ -123,9 +123,9 @@ export const createUserProject = async (req: Request, res: Response) => {
       });
 
       // Generate website code
-        // model: "kwaipilot/kat-coder-pro:free",
+      // model: "kwaipilot/kat-coder-pro:free",
       const codeGenerationResponse = await openai.chat.completions.create({
-        model: "groq/compound-mini",
+        model: "arcee-ai/trinity-large-preview:free",
         messages: [
           {
             role: "system",
